@@ -4,7 +4,7 @@ import pytest
 from jinja2 import Template
 
 from knot_resolver_manager.datamodel.types import EscQuotesStr
-from knot_resolver_manager.utils.modelling import SchemaNode
+from knot_resolver_manager.utils.modeling import BaseSchema
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ from knot_resolver_manager.utils.modelling import SchemaNode
     ],
 )
 def test_escaped_quotes_string(val: Any, exp: str):
-    class TestSchema(SchemaNode):
+    class TestSchema(BaseSchema):
         escaped: EscQuotesStr
 
     d = TestSchema({"escaped": val})
