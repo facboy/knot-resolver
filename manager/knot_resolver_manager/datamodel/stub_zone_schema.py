@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from knot_resolver_manager.datamodel.types import DomainName, IPAddressOptionalPort, PolicyFlagEnum
+from knot_resolver_manager.datamodel.types import DomainName, IDPattern, IPAddressOptionalPort, PolicyFlagEnum
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -28,5 +28,5 @@ class StubZoneSchema(BaseSchema):
 
     name: DomainName
     servers: Union[List[IPAddressOptionalPort], List[StubServerSchema]]
-    views: Optional[List[str]] = None
+    views: Optional[List[IDPattern]] = None
     options: Optional[List[PolicyFlagEnum]] = None
