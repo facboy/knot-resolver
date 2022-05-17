@@ -2,7 +2,6 @@ import re
 from typing import Any, Dict, List, Pattern, Type
 
 from knot_resolver_manager.utils.modeling import BaseValueType
-from knot_resolver_manager.utils.modeling.exceptions import DataValidationError
 
 
 class IntBase(BaseValueType):
@@ -78,7 +77,7 @@ class EscStrBase(StrBase):
                 source_str = source_str.replace(esc_char, rf"\{esc_char}")
             self._value = source_str
         else:
-            raise DataValidationError(
+            raise ValueError(
                 f"Unexpected value for '{type(self)}'."
                 f" Expected string or int, got '{source_value}' with type '{type(source_value)}'",
                 object_path,

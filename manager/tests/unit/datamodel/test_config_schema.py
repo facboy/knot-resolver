@@ -4,8 +4,8 @@ from typing import Any, Dict, Type, cast
 
 from knot_resolver_manager.datamodel import KresConfig
 from knot_resolver_manager.datamodel.lua_schema import LuaSchema
-from knot_resolver_manager.utils.modelling import SchemaNode
-from knot_resolver_manager.utils.types import (
+from knot_resolver_manager.utils.modeling import BaseSchema
+from knot_resolver_manager.utils.modeling.types import (
     get_generic_type_argument,
     get_generic_type_arguments,
     get_optional_inner_type,
@@ -36,7 +36,7 @@ def test_config_check_str_type():
             inner_type = get_generic_type_argument(cls)
             _check_str_type(inner_type, object_path)
 
-        elif inspect.isclass(cls) and issubclass(cls, SchemaNode):
+        elif inspect.isclass(cls) and issubclass(cls, BaseSchema):
             annot = cls.__dict__.get("__annotations__", {})
             for name, python_type in annot.items():
                 # ignore lua section

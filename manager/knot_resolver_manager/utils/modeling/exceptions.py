@@ -3,7 +3,7 @@ from typing import Iterable, List
 
 class DataModelingBaseException(Exception):
     """
-    Base class for all exceptions used in modelling.
+    Base class for all exceptions used in modeling.
     """
 
 

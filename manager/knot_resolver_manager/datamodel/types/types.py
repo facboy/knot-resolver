@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from knot_resolver_manager.datamodel.types.base_types import EscStrBase, IntRangeBase, PatternBase, StrBase, UnitBase
 from knot_resolver_manager.utils.modeling import BaseValueType
-from knot_resolver_manager.utils.modeling.exceptions import DataValidationError
 
 
 class IntNonNegative(IntRangeBase):
@@ -148,7 +147,7 @@ class RawString(EscQuotesString):
             esc = str(source_value).encode("unicode-escape").decode()
             super().__init__(esc, object_path)
         else:
-            raise DataValidationError(
+            raise ValueError(
                 f"Unexpected value for '{type(self)}'."
                 f" Expected string, got '{source_value}' with type '{type(source_value)}'",
                 object_path,

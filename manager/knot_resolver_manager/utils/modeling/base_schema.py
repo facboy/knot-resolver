@@ -469,7 +469,7 @@ class BaseSchema(Serializable):
     Example
     =======
 
-    See tests/utils/test_modelling.py for example usage.
+    See tests/utils/test_modeling.py for example usage.
     """
 
     _LAYER: Optional[Type["BaseSchema"]] = None

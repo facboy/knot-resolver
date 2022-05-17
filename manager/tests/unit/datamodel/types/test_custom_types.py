@@ -26,7 +26,6 @@ from knot_resolver_manager.datamodel.types import (
     TimeUnit,
 )
 from knot_resolver_manager.utils.modeling import BaseSchema
-from knot_resolver_manager.utils.modeling.exceptions import DataValidationError
 
 
 def _rand_domain(label_chars: int, levels: int = 1) -> str:
@@ -115,7 +114,7 @@ def test_pin_sha256_valid(val: str):
     ],
 )
 def test_pin_sha256_invalid(val: str):
-    with raises(KresManagerException):
+    with raises(ValueError):
         PinSha256(val)
 
 
@@ -140,7 +139,7 @@ def test_esc_quotes_string_valid(val: Any, exp: str):
 
 @pytest.mark.parametrize("val", [1.1, False])
 def test_escaped_quotes_string_invalid(val: Any):
-    with raises(DataValidationError):
+    with raises(ValueError):
         EscQuotesString(val)
 
 
@@ -166,7 +165,7 @@ def test_raw_string_valid(val: Any, exp: str):
 
 @pytest.mark.parametrize("val", [1.1, False])
 def test_raw_string_invalid(val: Any):
-    with raises(DataValidationError):
+    with raises(ValueError):
         RawString(val)
 
 
