@@ -23,7 +23,7 @@ from knot_resolver_manager.datamodel.rpz_schema import RPZSchema
 from knot_resolver_manager.datamodel.slice_schema import SliceSchema
 from knot_resolver_manager.datamodel.static_hints_schema import StaticHintsSchema
 from knot_resolver_manager.datamodel.stub_zone_schema import StubZoneSchema
-from knot_resolver_manager.datamodel.types.types import IntPositive, UncheckedPath
+from knot_resolver_manager.datamodel.types import EscQuotesString, IDPattern, IntPositive, UncheckedPath
 from knot_resolver_manager.datamodel.view_schema import ViewSchema
 from knot_resolver_manager.datamodel.webmgmt_schema import WebmgmtSchema
 from knot_resolver_manager.utils.modeling import BaseSchema
@@ -108,8 +108,8 @@ class KresConfig(BaseSchema):
         lua: Custom Lua configuration.
         """
 
-        nsid: Optional[str] = None
-        hostname: Optional[str] = None
+        nsid: Optional[EscQuotesString] = None
+        hostname: Optional[EscQuotesString] = None
         rundir: UncheckedPath = UncheckedPath(".")
         workers: Union[Literal["auto"], IntPositive] = IntPositive(1)
         max_workers: IntPositive = IntPositive(_default_max_worker_count())
@@ -118,7 +118,7 @@ class KresConfig(BaseSchema):
         options: OptionsSchema = OptionsSchema()
         network: NetworkSchema = NetworkSchema()
         static_hints: StaticHintsSchema = StaticHintsSchema()
-        views: Optional[Dict[str, ViewSchema]] = None
+        views: Optional[Dict[IDPattern, ViewSchema]] = None
         slices: Optional[List[SliceSchema]] = None
         policy: Optional[List[PolicySchema]] = None
         rpz: Optional[List[RPZSchema]] = None
@@ -133,8 +133,8 @@ class KresConfig(BaseSchema):
 
     _LAYER = Raw
 
-    nsid: Optional[str]
-    hostname: str
+    nsid: Optional[EscQuotesString]
+    hostname: EscQuotesString
     rundir: UncheckedPath
     workers: IntPositive
     max_workers: IntPositive
@@ -143,7 +143,7 @@ class KresConfig(BaseSchema):
     options: OptionsSchema
     network: NetworkSchema
     static_hints: StaticHintsSchema
-    views: Optional[Dict[str, ViewSchema]]
+    views: Optional[Dict[IDPattern, ViewSchema]]
     slices: Optional[List[SliceSchema]]
     policy: Optional[List[PolicySchema]]
     rpz: Optional[List[RPZSchema]]
@@ -158,7 +158,7 @@ class KresConfig(BaseSchema):
 
     def _hostname(self, obj: Raw) -> Any:
         if obj.hostname is None:
-            return socket.gethostname()
+            return EscQuotesString(socket.gethostname())
         return obj.hostname
 
     def _workers(self, obj: Raw) -> Any:

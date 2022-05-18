@@ -61,7 +61,7 @@ class ForwardServerSchema(BaseSchema):
     """
 
     address: IPAddressOptionalPort
-    pin_sha256: Optional[Union[str, List[PinSha256]]] = None
+    pin_sha256: Optional[Union[PinSha256, List[PinSha256]]] = None
     hostname: Optional[DomainName] = None
     ca_file: Optional[CheckedPath] = None
 
@@ -109,7 +109,7 @@ class ActionSchema(BaseSchema):
     """
 
     action: PolicyActionEnum
-    message: Optional[str] = None
+    message: Optional[EscQuotesString] = None
     reroute: Optional[List[AddressRenumberingSchema]] = None
     answer: Optional[AnswerSchema] = None
     servers: Optional[Union[List[IPAddressOptionalPort], List[ForwardServerSchema]]] = None

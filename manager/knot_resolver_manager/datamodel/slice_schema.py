@@ -3,6 +3,7 @@ from typing import List, Optional
 from typing_extensions import Literal
 
 from knot_resolver_manager.datamodel.policy_schema import ActionSchema
+from knot_resolver_manager.datamodel.types import IDPattern
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -17,5 +18,5 @@ class SliceSchema(BaseSchema):
     """
 
     function: Literal["randomize-psl"] = "randomize-psl"
-    views: Optional[List[str]] = None
+    views: Optional[List[IDPattern]] = None
     actions: List[ActionSchema]
