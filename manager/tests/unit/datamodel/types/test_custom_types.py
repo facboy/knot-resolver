@@ -9,7 +9,7 @@ from pytest import raises
 from knot_resolver_manager.datamodel.types import (
     CheckedPath,
     DomainName,
-    EscQuotesString,
+    EscapedStr,
     InterfaceName,
     InterfaceOptionalPort,
     InterfacePort,
@@ -21,7 +21,7 @@ from knot_resolver_manager.datamodel.types import (
     IPv6Network96,
     PinSha256,
     PortNumber,
-    RawString,
+    RawStr,
     SizeUnit,
     TimeUnit,
 )
@@ -134,13 +134,13 @@ def test_pin_sha256_invalid(val: str):
     ],
 )
 def test_esc_quotes_string_valid(val: Any, exp: str):
-    assert str(EscQuotesString(val)) == exp
+    assert str(EscapedStr(val)) == exp
 
 
 @pytest.mark.parametrize("val", [1.1, False])
 def test_escaped_quotes_string_invalid(val: Any):
     with raises(ValueError):
-        EscQuotesString(val)
+        EscapedStr(val)
 
 
 @pytest.mark.parametrize(
@@ -160,13 +160,13 @@ def test_escaped_quotes_string_invalid(val: Any):
     ],
 )
 def test_raw_string_valid(val: Any, exp: str):
-    assert str(RawString(val)) == exp
+    assert str(RawStr(val)) == exp
 
 
 @pytest.mark.parametrize("val", [1.1, False])
 def test_raw_string_invalid(val: Any):
     with raises(ValueError):
-        RawString(val)
+        RawStr(val)
 
 
 @pytest.mark.parametrize(

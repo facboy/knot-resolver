@@ -1,12 +1,6 @@
 from typing import List, Optional
 
-from knot_resolver_manager.datamodel.types import (
-    CheckedPath,
-    EscQuotesString,
-    IDPattern,
-    PolicyActionEnum,
-    PolicyFlagEnum,
-)
+from knot_resolver_manager.datamodel.types import CheckedPath, EscapedStr, IDPattern, PolicyActionEnum, PolicyFlagEnum
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -28,7 +22,7 @@ class RPZSchema(BaseSchema):
     watch: bool = True
     views: Optional[List[IDPattern]] = None
     options: Optional[List[PolicyFlagEnum]] = None
-    message: Optional[EscQuotesString] = None
+    message: Optional[EscapedStr] = None
 
     def _validate(self) -> None:
         if self.message and not self.action == "deny":

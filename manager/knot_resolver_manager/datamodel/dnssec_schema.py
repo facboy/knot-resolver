@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from knot_resolver_manager.datamodel.types import CheckedPath, DomainName, EscQuotesString, IntNonNegative, TimeUnit
+from knot_resolver_manager.datamodel.types import CheckedPath, DomainName, EscapedStr, IntNonNegative, TimeUnit
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -40,6 +40,6 @@ class DnssecSchema(BaseSchema):
     keep_removed: IntNonNegative = IntNonNegative(0)
     refresh_time: Optional[TimeUnit] = None
     hold_down_time: TimeUnit = TimeUnit("30d")
-    trust_anchors: Optional[List[EscQuotesString]] = None
+    trust_anchors: Optional[List[EscapedStr]] = None
     negative_trust_anchors: Optional[List[DomainName]] = None
     trust_anchors_files: Optional[List[TrustAnchorFileSchema]] = None

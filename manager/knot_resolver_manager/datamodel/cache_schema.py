@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from knot_resolver_manager.datamodel.types import CheckedPath, DomainName, EscQuotesString, SizeUnit, TimeUnit
+from knot_resolver_manager.datamodel.types import CheckedPath, DomainName, EscapedStr, SizeUnit, TimeUnit
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -16,7 +16,7 @@ class PrefillSchema(BaseSchema):
     """
 
     origin: DomainName
-    url: EscQuotesString
+    url: EscapedStr
     refresh_interval: TimeUnit = TimeUnit("1d")
     ca_file: Optional[CheckedPath] = None
 

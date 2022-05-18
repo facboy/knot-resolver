@@ -5,13 +5,13 @@ from knot_resolver_manager.datamodel.types import (
     CheckedPath,
     DNSRecordTypeEnum,
     DomainName,
-    EscQuotesString,
+    EscapedStr,
     IDPattern,
     IPAddressOptionalPort,
     PinSha256,
     PolicyActionEnum,
     PolicyFlagEnum,
-    RawString,
+    RawStr,
     TimeUnit,
 )
 from knot_resolver_manager.utils.modeling import BaseSchema
@@ -28,7 +28,7 @@ class FilterSchema(BaseSchema):
     """
 
     suffix: Optional[DomainName] = None
-    pattern: Optional[RawString] = None
+    pattern: Optional[RawStr] = None
     qtype: Optional[DNSRecordTypeEnum] = None
 
 
@@ -44,7 +44,7 @@ class AnswerSchema(BaseSchema):
     """
 
     rtype: DNSRecordTypeEnum
-    rdata: EscQuotesString
+    rdata: EscapedStr
     ttl: TimeUnit = TimeUnit("1s")
     nodata: bool = False
 
@@ -109,7 +109,7 @@ class ActionSchema(BaseSchema):
     """
 
     action: PolicyActionEnum
-    message: Optional[EscQuotesString] = None
+    message: Optional[EscapedStr] = None
     reroute: Optional[List[AddressRenumberingSchema]] = None
     answer: Optional[AnswerSchema] = None
     servers: Optional[Union[List[IPAddressOptionalPort], List[ForwardServerSchema]]] = None
@@ -139,7 +139,7 @@ class PolicySchema(BaseSchema):
     filter: Optional[FilterSchema] = None
     views: Optional[List[IDPattern]] = None
     options: Optional[List[PolicyFlagEnum]] = None
-    message: Optional[EscQuotesString] = None
+    message: Optional[EscapedStr] = None
     reroute: Optional[List[AddressRenumberingSchema]] = None
     answer: Optional[AnswerSchema] = None
     servers: Optional[Union[List[IPAddressOptionalPort], List[ForwardServerSchema]]] = None

@@ -129,15 +129,15 @@ class PinSha256(PatternBase):
     _re = re.compile(r"^[A-Za-z\d+/]{86}==$")
 
 
-class EscQuotesString(EscStrBase):
+class EscapedStr(EscStrBase):
     """
-    A string that escapes quotes.
+    A string that escapes quotes and new lines.
     """
 
-    _esc_chars: List[str] = ["'", '"']
+    _esc_chars: List[str] = ["'", '"', "\n"]
 
 
-class RawString(EscQuotesString):
+class RawStr(EscapedStr):
     """
     A string that stores escaped unicode chars.
     """

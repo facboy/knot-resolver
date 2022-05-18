@@ -23,7 +23,7 @@ from knot_resolver_manager.datamodel.rpz_schema import RPZSchema
 from knot_resolver_manager.datamodel.slice_schema import SliceSchema
 from knot_resolver_manager.datamodel.static_hints_schema import StaticHintsSchema
 from knot_resolver_manager.datamodel.stub_zone_schema import StubZoneSchema
-from knot_resolver_manager.datamodel.types import EscQuotesString, IDPattern, IntPositive, UncheckedPath
+from knot_resolver_manager.datamodel.types import EscapedStr, IDPattern, IntPositive, UncheckedPath
 from knot_resolver_manager.datamodel.view_schema import ViewSchema
 from knot_resolver_manager.datamodel.webmgmt_schema import WebmgmtSchema
 from knot_resolver_manager.utils.modeling import BaseSchema
@@ -108,8 +108,8 @@ class KresConfig(BaseSchema):
         lua: Custom Lua configuration.
         """
 
-        nsid: Optional[EscQuotesString] = None
-        hostname: Optional[EscQuotesString] = None
+        nsid: Optional[EscapedStr] = None
+        hostname: Optional[EscapedStr] = None
         rundir: UncheckedPath = UncheckedPath(".")
         workers: Union[Literal["auto"], IntPositive] = IntPositive(1)
         max_workers: IntPositive = IntPositive(_default_max_worker_count())
@@ -133,8 +133,8 @@ class KresConfig(BaseSchema):
 
     _LAYER = Raw
 
-    nsid: Optional[EscQuotesString]
-    hostname: EscQuotesString
+    nsid: Optional[EscapedStr]
+    hostname: EscapedStr
     rundir: UncheckedPath
     workers: IntPositive
     max_workers: IntPositive
@@ -158,7 +158,7 @@ class KresConfig(BaseSchema):
 
     def _hostname(self, obj: Raw) -> Any:
         if obj.hostname is None:
-            return EscQuotesString(socket.gethostname())
+            return EscapedStr(socket.gethostname())
         return obj.hostname
 
     def _workers(self, obj: Raw) -> Any:
