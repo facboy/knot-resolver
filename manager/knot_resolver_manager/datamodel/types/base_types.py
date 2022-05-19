@@ -63,8 +63,8 @@ class EscStrBase(StrBase):
     Base class to escape some chars.
     Just inherit the class and set escaped characters in '_esc'.
 
-    class EscTabStr(PatternBase):
-        _esc: List[str] = ["\t"]
+    class EscTabStr(EscStrBase):
+        _esc_chars: List[str] = ["\t"]
     """
 
     _esc_chars: List[str]

@@ -137,15 +137,17 @@ class EscapedStr(EscStrBase):
     _esc_chars: List[str] = ["'", '"', "\n"]
 
 
-class RawStr(EscapedStr):
+class RawStr(EscStrBase):
     """
-    A string that stores escaped unicode chars.
+    A string that stores raw representation of string and escapes quotes.
     """
+
+    _esc_chars: List[str] = ["'", '"']
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
         if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
-            esc = str(source_value).encode("unicode-escape").decode()
-            super().__init__(esc, object_path)
+            raw = repr(str(source_value))[1:-1]
+            super().__init__(raw, object_path)
         else:
             raise ValueError(
                 f"Unexpected value for '{type(self)}'."

@@ -133,7 +133,7 @@ def test_pin_sha256_invalid(val: str):
         # fmt: on
     ],
 )
-def test_esc_quotes_string_valid(val: Any, exp: str):
+def test_escaped_str_valid(val: Any, exp: str):
     assert str(EscapedStr(val)) == exp
 
 
@@ -150,11 +150,10 @@ def test_escaped_quotes_string_invalid(val: Any):
         ("string", r"string"),
         ("[^i*&2@]\t", r"[^i*&2@]\t"),
         # fmt: off
-        ("\"\n\"", r'\"\n\"'),
-        ("\'\n\'", r'\'\n\''),
-        ('\'\n\'', r'\'\n\''),
+        ("\\n", r"\\n"),
+        ("\'\n\'", r"\'\n\'"),
         ('\"\n\"', r'\"\n\"'),
-        ("'\n'", r'\'\n\''),
+        ("'\n'", r"\'\n\'"),
         ('"\n"', r'\"\n\"'),
         # fmt: on
     ],
