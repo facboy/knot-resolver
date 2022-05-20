@@ -75,16 +75,16 @@ class StrLengthBase(StrBase):
         if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
             val_len = len(str(source_value).encode("utf-8"))
             if hasattr(self, "_min_bytes") and (val_len < self._min_bytes):
-                raise SchemaException(
+                raise ValueError(
                     f"the string value {source_value} is shorter than the minimum {self._min_bytes} bytes.", object_path
                 )
             if hasattr(self, "_max_bytes") and (val_len > self._max_bytes):
-                raise SchemaException(
+                raise ValueError(
                     f"the string value {source_value} is longer than the maximum {self._max_bytes} bytes.", object_path
                 )
             self._value = str(source_value)
         else:
-            raise SchemaException(
+            raise ValueError(
                 f"expected integer, got '{type(source_value)}'",
                 object_path,
             )

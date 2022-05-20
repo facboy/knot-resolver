@@ -12,7 +12,7 @@ from knot_resolver_manager.datamodel.types import (
     IPv4Address,
     IPv6Address,
     PortNumber,
-    RawStr,
+    RawStr32B,
     SizeUnit,
 )
 from knot_resolver_manager.utils.modeling import BaseSchema
@@ -61,7 +61,7 @@ class TLSSchema(BaseSchema):
 
     cert_file: Optional[CheckedPath] = None
     key_file: Optional[CheckedPath] = None
-    sticket_secret: Optional[RawStr] = None
+    sticket_secret: Optional[RawStr32B] = None
     sticket_secret_file: Optional[CheckedPath] = None
     auto_discovery: bool = False
     padding: Union[bool, Int0_512] = True

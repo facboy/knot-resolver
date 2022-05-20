@@ -3,7 +3,14 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
-from knot_resolver_manager.datamodel.types.base_types import EscStrBase, IntRangeBase, PatternBase, StrBase, UnitBase
+from knot_resolver_manager.datamodel.types.base_types import (
+    EscStrBase,
+    IntRangeBase,
+    PatternBase,
+    StrBase,
+    StrLengthBase,
+    UnitBase,
+)
 from knot_resolver_manager.utils.modeling import BaseValueType
 
 
@@ -154,6 +161,18 @@ class RawStr(EscStrBase):
                 f" Expected string, got '{source_value}' with type '{type(source_value)}'",
                 object_path,
             )
+
+
+class RawStr32B(RawStr, StrLengthBase):
+    """
+    Same as 'RawStr', but minimal length is 32 bytes.
+    """
+
+    _min_bytes: int = 32
+
+    def __init__(self, source_value: Any, object_path: str = "/") -> None:
+        RawStr.__init__(self, source_value, object_path)
+        StrLengthBase.__init__(self, self._value, object_path)
 
 
 class InterfacePort(StrBase):
