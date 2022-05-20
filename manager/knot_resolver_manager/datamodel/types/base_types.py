@@ -58,6 +58,47 @@ class StrBase(BaseValueType):
         return {"type": "string"}
 
 
+class StrLengthBase(StrBase):
+    """
+    Base class to work with string value length.
+    Just inherit the class and set the values for '_min_bytes' and '_max_bytes'.
+
+    class StrMinLen32B(StrLengthBase):
+        _min_bytes: int = 32
+    """
+
+    _min_bytes: int = 1
+    _max_bytes: int
+
+    def __init__(self, source_value: Any, object_path: str = "/") -> None:
+        super().__init__(source_value)
+        if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
+            val_len = len(str(source_value).encode("utf-8"))
+            if hasattr(self, "_min_bytes") and (val_len < self._min_bytes):
+                raise SchemaException(
+                    f"the string value {source_value} is shorter than the minimum {self._min_bytes} bytes.", object_path
+                )
+            if hasattr(self, "_max_bytes") and (val_len > self._max_bytes):
+                raise SchemaException(
+                    f"the string value {source_value} is longer than the maximum {self._max_bytes} bytes.", object_path
+                )
+            self._value = str(source_value)
+        else:
+            raise SchemaException(
+                f"expected integer, got '{type(source_value)}'",
+                object_path,
+            )
+
+    @classmethod
+    def json_schema(cls: Type["StrLengthBase"]) -> Dict[Any, Any]:
+        typ: Dict[str, Any] = {"type": "string"}
+        if hasattr(cls, "_min_bytes"):
+            typ["minLength"] = cls._min_bytes
+        if hasattr(cls, "_max_bytes"):
+            typ["maxLength"] = cls._max_bytes
+        return typ
+
+
 class EscStrBase(StrBase):
     r"""
     Base class to escape some chars.
