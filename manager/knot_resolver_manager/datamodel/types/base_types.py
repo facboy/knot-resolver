@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Pattern, Type
+from typing import Any, Dict, Pattern, Type
 
 from knot_resolver_manager.utils.modeling import BaseValueType
 
@@ -9,7 +9,20 @@ class IntBase(BaseValueType):
     Base class to work with integer value.
     """
 
+    _orig_value: int
     _value: int
+
+    def __init__(self, source_value: Any, object_path: str = "/") -> None:
+        super().__init__(source_value, object_path)
+        if isinstance(source_value, int) and not isinstance(source_value, bool):
+            self._orig_value = source_value
+            self._value = source_value
+        else:
+            raise ValueError(
+                f"Unexpected value for '{type(self)}'."
+                f" Expected integer, got '{source_value}' with type '{type(source_value)}'",
+                object_path,
+            )
 
     def __int__(self) -> int:
         return self._value
@@ -17,11 +30,14 @@ class IntBase(BaseValueType):
     def __str__(self) -> str:
         return str(self._value)
 
+    def __repr__(self) -> str:
+        return f'{type(self).__name__}("{self._value}")'
+
     def __eq__(self, o: object) -> bool:
         return isinstance(o, IntBase) and o._value == self._value
 
     def serialize(self) -> Any:
-        return self._value
+        return self._orig_value
 
     @classmethod
     def json_schema(cls: Type["IntBase"]) -> Dict[Any, Any]:
@@ -33,7 +49,20 @@ class StrBase(BaseValueType):
     Base class to work with string value.
     """
 
+    _orig_value: str
     _value: str
+
+    def __init__(self, source_value: Any, object_path: str = "/") -> None:
+        super().__init__(source_value, object_path)
+        if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
+            self._orig_value = str(source_value)
+            self._value = str(source_value)
+        else:
+            raise ValueError(
+                f"Unexpected value for '{type(self)}'."
+                f" Expected string, got '{source_value}' with type '{type(source_value)}'",
+                object_path,
+            )
 
     def __int__(self) -> int:
         raise ValueError("Can't convert string to an integer.")
@@ -41,8 +70,8 @@ class StrBase(BaseValueType):
     def __str__(self) -> str:
         return self._value
 
-    def to_std(self) -> str:
-        return self._value
+    def __repr__(self) -> str:
+        return f'{type(self).__name__}("{self._value}")'
 
     def __hash__(self) -> int:
         return hash(self._value)
@@ -51,6 +80,12 @@ class StrBase(BaseValueType):
         return isinstance(o, StrBase) and o._value == self._value
 
     def serialize(self) -> Any:
+        return self._orig_value
+
+    def quotes_escape(self) -> str:
+        return self._value
+
+    def multiline_escape(self) -> str:
         return self._value
 
     @classmethod
@@ -58,12 +93,12 @@ class StrBase(BaseValueType):
         return {"type": "string"}
 
 
-class StrLengthBase(StrBase):
+class StringLengthBase(StrBase):
     """
     Base class to work with string value length.
     Just inherit the class and set the values for '_min_bytes' and '_max_bytes'.
 
-    class StrMinLen32B(StrLengthBase):
+    class String32B(StringLengthBase):
         _min_bytes: int = 32
     """
 
@@ -71,58 +106,25 @@ class StrLengthBase(StrBase):
     _max_bytes: int
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value)
-        if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
-            val_len = len(str(source_value).encode("utf-8"))
-            if hasattr(self, "_min_bytes") and (val_len < self._min_bytes):
-                raise ValueError(
-                    f"the string value {source_value} is shorter than the minimum {self._min_bytes} bytes.", object_path
-                )
-            if hasattr(self, "_max_bytes") and (val_len > self._max_bytes):
-                raise ValueError(
-                    f"the string value {source_value} is longer than the maximum {self._max_bytes} bytes.", object_path
-                )
-            self._value = str(source_value)
-        else:
+        super().__init__(source_value, object_path)
+        value_bytes = len(self._value.encode("utf-8"))
+        if hasattr(self, "_min_bytes") and (value_bytes < self._min_bytes):
             raise ValueError(
-                f"expected integer, got '{type(source_value)}'",
-                object_path,
+                f"the string value {source_value} is shorter than the minimum {self._min_bytes} bytes.", object_path
+            )
+        if hasattr(self, "_max_bytes") and (value_bytes > self._max_bytes):
+            raise ValueError(
+                f"the string value {source_value} is longer than the maximum {self._max_bytes} bytes.", object_path
             )
 
     @classmethod
-    def json_schema(cls: Type["StrLengthBase"]) -> Dict[Any, Any]:
+    def json_schema(cls: Type["StringLengthBase"]) -> Dict[Any, Any]:
         typ: Dict[str, Any] = {"type": "string"}
         if hasattr(cls, "_min_bytes"):
             typ["minLength"] = cls._min_bytes
         if hasattr(cls, "_max_bytes"):
             typ["maxLength"] = cls._max_bytes
         return typ
-
-
-class EscStrBase(StrBase):
-    r"""
-    Base class to escape some chars.
-    Just inherit the class and set escaped characters in '_esc'.
-
-    class EscTabStr(EscStrBase):
-        _esc_chars: List[str] = ["\t"]
-    """
-
-    _esc_chars: List[str]
-
-    def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value, object_path)
-        if isinstance(source_value, (str, int)) and not isinstance(source_value, bool):
-            source_str = str(source_value)
-            for esc_char in self._esc_chars:
-                source_str = source_str.replace(esc_char, rf"\{esc_char}")
-            self._value = source_str
-        else:
-            raise ValueError(
-                f"Unexpected value for '{type(self)}'."
-                f" Expected string or int, got '{source_value}' with type '{type(source_value)}'",
-                object_path,
-            )
 
 
 class IntRangeBase(IntBase):
@@ -138,18 +140,11 @@ class IntRangeBase(IntBase):
     _max: int
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value)
-        if isinstance(source_value, int) and not isinstance(source_value, bool):
-            if hasattr(self, "_min") and (source_value < self._min):
-                raise ValueError(f"value {source_value} is lower than the minimum {self._min}.")
-            if hasattr(self, "_max") and (source_value > self._max):
-                raise ValueError(f"value {source_value} is higher than the maximum {self._max}")
-            self._value = source_value
-        else:
-            raise ValueError(
-                f"expected integer, got '{type(source_value)}'",
-                object_path,
-            )
+        super().__init__(source_value, object_path)
+        if hasattr(self, "_min") and (self._value < self._min):
+            raise ValueError(f"value {self._value} is lower than the minimum {self._min}.", object_path)
+        if hasattr(self, "_max") and (self._value > self._max):
+            raise ValueError(f"value {self._value} is higher than the maximum {self._max}", object_path)
 
     @classmethod
     def json_schema(cls: Type["IntRangeBase"]) -> Dict[Any, Any]:
@@ -173,24 +168,16 @@ class PatternBase(StrBase):
     _re: Pattern[str]
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value)
-        if isinstance(source_value, str):
-            if type(self)._re.match(source_value):
-                self._value: str = source_value
-            else:
-                raise ValueError(f"'{source_value}' does not match '{self._re.pattern}' pattern")
-        else:
-            raise ValueError(
-                f"expected string, got '{type(source_value)}'",
-                object_path,
-            )
+        super().__init__(source_value, object_path)
+        if not type(self)._re.match(self._value):
+            raise ValueError(f"'{self._value}' does not match '{self._re.pattern}' pattern", object_path)
 
     @classmethod
     def json_schema(cls: Type["PatternBase"]) -> Dict[Any, Any]:
         return {"type": "string", "pattern": rf"{cls._re.pattern}"}
 
 
-class UnitBase(IntBase):
+class UnitBase(StrBase):
     """
     Base class to work with string value that match regex pattern.
     Just inherit the class and set '_units'.
@@ -201,56 +188,37 @@ class UnitBase(IntBase):
 
     _re: Pattern[str]
     _units: Dict[str, int]
-    _value_orig: str
+    _base_value: int
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value)
+        super().__init__(source_value, object_path)
+
         type(self)._re = re.compile(rf"^(\d+)({r'|'.join(type(self)._units.keys())})$")
-        if isinstance(source_value, str) and self._re.match(source_value):
-            self._value_orig = source_value
-            grouped = self._re.search(source_value)
-            if grouped:
-                val, unit = grouped.groups()
-                if unit is None:
-                    raise ValueError(f"Missing units. Accepted units are {list(type(self)._units.keys())}")
-                elif unit not in type(self)._units:
-                    raise ValueError(
-                        f"Used unexpected unit '{unit}' for {type(self).__name__}."
-                        f" Accepted units are {list(type(self)._units.keys())}",
-                        object_path,
-                    )
-                self._value = int(val) * type(self)._units[unit]
-            else:
-                raise ValueError(f"{type(self._value)} Failed to convert: {self}")
-        elif isinstance(source_value, int):
-            raise ValueError(
-                f"number without units, please convert to string and add unit  - {list(type(self)._units.keys())}",
-                object_path,
-            )
+        grouped = self._re.search(self._value)
+        if grouped:
+            val, unit = grouped.groups()
+            if unit is None:
+                raise ValueError(f"Missing units. Accepted units are {list(type(self)._units.keys())}", object_path)
+            elif unit not in type(self)._units:
+                raise ValueError(
+                    f"Used unexpected unit '{unit}' for {type(self).__name__}."
+                    f" Accepted units are {list(type(self)._units.keys())}",
+                    object_path,
+                )
+            self._base_value = int(val) * type(self)._units[unit]
         else:
             raise ValueError(
-                f"expected number with units in a string, got '{type(source_value)}'.",
+                f"Unexpected value for '{type(self)}'."
+                " Expected string that matches pattern " + rf"'{type(self)._re.pattern}'."
+                f" Positive integer and one of the units {list(type(self)._units.keys())}, got '{source_value}'.",
                 object_path,
             )
 
-    def __str__(self) -> str:
-        """
-        Used by Jinja2. Must return only a number.
-        """
-        return str(self._value_orig)
+    def __int__(self) -> int:
+        return self._base_value
 
     def __repr__(self) -> str:
-        return f"Unit[{type(self).__name__},{self._value_orig}]"
-
-    def __eq__(self, o: object) -> bool:
-        """
-        Two instances are equal when they represent the same size
-        regardless of their string representation.
-        """
-        return isinstance(o, UnitBase) and o._value == self._value
-
-    def serialize(self) -> Any:
-        return self._value_orig
+        return f"Unit[{type(self).__name__},{self._value}]"
 
     @classmethod
     def json_schema(cls: Type["UnitBase"]) -> Dict[Any, Any]:

@@ -5,20 +5,8 @@ from typing import List, Optional
 import pytest
 from pytest import raises
 
-from knot_resolver_manager.datamodel.types.base_types import EscStrBase, IntRangeBase, StrLengthBase
+from knot_resolver_manager.datamodel.types.base_types import IntRangeBase, StringLengthBase
 from knot_resolver_manager.exceptions import KresManagerException
-
-
-@pytest.mark.parametrize(
-    "esc",
-    [["'", '"'], [" ", "\t", "\n"]],
-)
-def test_esc_str_base(esc: List[str]):
-    class Test(EscStrBase):
-        _esc_chars = esc
-
-    for e in esc:
-        assert str(Test(f"{e}test")) == rf"\{e}test"
 
 
 @pytest.mark.parametrize("min,max", [(0, None), (None, 0), (1, 65535), (-65535, -1)])
@@ -51,8 +39,8 @@ def test_int_range_base(min: Optional[int], max: Optional[int]):
 
 
 @pytest.mark.parametrize("min,max", [(10, None), (None, 10), (2, 32)])
-def test_str_length_base(min: Optional[int], max: Optional[int]):
-    class Test(StrLengthBase):
+def test_str_bytes_length_base(min: Optional[int], max: Optional[int]):
+    class Test(StringLengthBase):
         if min:
             _min_bytes = min
         if max:

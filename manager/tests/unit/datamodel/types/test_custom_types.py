@@ -80,8 +80,8 @@ def test_parsing_units():
         time: TimeUnit
 
     o = TestSchema({"size": "3K", "time": "10m"})
-    assert o.size == SizeUnit("3072B")
-    assert o.time == TimeUnit("600s")
+    assert int(o.size) == int(SizeUnit("3072B"))
+    assert int(o.time) == int(TimeUnit("600s"))
     assert o.size.bytes() == 3072
     assert o.time.seconds() == 10 * 60
 
@@ -123,13 +123,16 @@ def test_pin_sha256_invalid(val: str):
     [
         ("string", "string"),
         (2000, "2000"),
-        ('"double quotes"', r"\"double quotes\""),
-        ("'single quotes'", r"\'single quotes\'"),
+        ("\a\b\f\n\r\t\v\\", r"\a\b\f\n\r\t\v\\"),
+        ('""', r"\"\""),
+        ("''", r"\'\'"),
         # fmt: off
-        ('\"double quotes\"', r"\"double quotes\""),
-        ("\'single quotes\'", r"\'single quotes\'"),
-        ('\\"double quotes\\"', r'\\"double quotes\\"'),
-        ("\\'single quotes\\'", r"\\'single quotes\\'"),
+        ("''", r"\'\'"),
+        ('""', r'\"\"'),
+        ('\"\"', r"\"\""),
+        ("\'\'", r"\'\'"),
+        ('\\"\\"', r'\\\"\\\"'),
+        ("\\'\\'", r"\\\'\\\'"),
         # fmt: on
     ],
 )
@@ -148,22 +151,24 @@ def test_escaped_quotes_string_invalid(val: Any):
     [
         (2000, "2000"),
         ("string", r"string"),
-        ("[^i*&2@]\t", r"[^i*&2@]\t"),
+        ("\t\n\x0b", r"\t\n\x0b"),
+        ("\a\b\f\n\r\t\v\\", r"\x07\x08\x0c\n\r\t\x0b\\"),
         # fmt: off
-        ("\\n", r"\\n"),
-        ("\'\n\'", r"\'\n\'"),
-        ('\"\n\"', r'\"\n\"'),
-        ("'\n'", r"\'\n\'"),
-        ('"\n"', r'\"\n\"'),
+        ("''", r"\'\'"),
+        ('""', r'\"\"'),
+        ("\'\'", r"\'\'"),
+        ('\"\"', r'\"\"'),
+        ('\\"\\"', r'\\\"\\\"'),
+        ("\\'\\'", r"\\\'\\\'"),
         # fmt: on
     ],
 )
-def test_raw_string_valid(val: Any, exp: str):
+def test_raw_str_valid(val: Any, exp: str):
     assert str(RawStr(val)) == exp
 
 
 @pytest.mark.parametrize("val", [1.1, False])
-def test_raw_string_invalid(val: Any):
+def test_raw_str_invalid(val: Any):
     with raises(ValueError):
         RawStr(val)
 

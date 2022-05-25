@@ -6,7 +6,7 @@ from jinja2 import Template
 from knot_resolver_manager.datamodel.types import EscapedStr, RawStr
 from knot_resolver_manager.utils.modeling import BaseSchema
 
-str_template = Template('"{{ string }}"')
+str_template = Template("'{{ string }}'")
 
 
 @pytest.mark.parametrize(
@@ -14,20 +14,20 @@ str_template = Template('"{{ string }}"')
     [
         ("string", "string"),
         (2000, "2000"),
-        ('"double quotes"', r"\"double quotes\""),
-        ("'single quotes'", r"\'single quotes\'"),
+        ('"\a\b\f\n\r\t\v\\"', r"\"\a\b\f\n\r\t\v\\\""),
+        ("''", r"\'\'"),
         # fmt: off
-        ('\"double quotes\"', r'\"double quotes\"'),
-        ("\'single quotes\'", r'\'single quotes\''),
+        ('\"\"', r'\"\"'),
+        ("\'\'", r'\'\''),
         # fmt: on
     ],
 )
-def test_escaped_quotes_string(val: Any, exp: str):
+def test_escaped_str(val: Any, exp: str):
     class TestSchema(BaseSchema):
         escaped: EscapedStr
 
     d = TestSchema({"escaped": val})
-    assert str_template.render(string=d.escaped) == f'"{exp}"'
+    assert str_template.render(string=d.escaped) == f"'{exp}'"
 
 
 @pytest.mark.parametrize(
@@ -35,12 +35,12 @@ def test_escaped_quotes_string(val: Any, exp: str):
     [
         ("string", "string"),
         (2000, "2000"),
-        ('\n\t"', r"\n\t\""),
-        ('"double quotes"', r"\"double quotes\""),
-        ("'single quotes'", r"\'single quotes\'"),
+        ('"\a\b\f\n\r\t\v\\"', r"\"\x07\x08\x0c\n\r\t\x0b\\\""),
+        ('""', r"\"\""),
+        ("''", r"\'\'"),
         # fmt: off
-        ('\"double quotes\"', r'\"double quotes\"'),
-        ("\'single quotes\'", r'\'single quotes\''),
+        ('\"\"', r'\"\"'),
+        ("\'\'", r'\'\''),
         # fmt: on
     ],
 )
@@ -49,4 +49,4 @@ def test_raw_string(val: Any, exp: str):
         pattern: RawStr
 
     d = TestSchema({"pattern": val})
-    assert str_template.render(string=d.pattern) == f'"{exp}"'
+    assert str_template.render(string=d.pattern) == f"'{exp}'"
