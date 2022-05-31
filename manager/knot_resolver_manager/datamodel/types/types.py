@@ -134,33 +134,7 @@ class PinSha256(PatternBase):
 
 class EscapedStr(StrBase):
     """
-    A string with escaped chars specific for the definition of literals in Lua.
-    https://www.lua.org/manual/5.1/manual.html#2.1
-    """
-
-    def __init__(self, source_value: Any, object_path: str = "/") -> None:
-        super().__init__(source_value, object_path)
-
-        escape = str.maketrans(
-            {
-                "'": r"\'",
-                '"': r"\"",
-                "\\": r"\\",
-                "\a": r"\a",
-                "\b": r"\b",
-                "\r": r"\r",
-                "\t": r"\t",
-                "\f": r"\f",
-                "\n": r"\n",
-                "\v": r"\v",
-            }
-        )
-        self._value = self._value.translate(escape)
-
-
-class RawStr(StrBase):
-    """
-    Raw representation of string.
+    A string with ignored escape sequences and escaped quotes.
     """
 
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
@@ -175,12 +149,27 @@ class RawStr(StrBase):
         self._value = repr(self._value)[1:-1].translate(escape)
 
 
-class RawStr32B(RawStr, StringLengthBase):
+class EscapedStr32B(EscapedStr, StringLengthBase):
     """
-    Same as 'RawStr', but minimal length is 32 bytes.
+    Same as 'EscapedStr', but minimal length is 32 bytes.
     """
 
     _min_bytes: int = 32
+
+
+class MultilineStr(StrBase):
+    """
+    A string for multiline literal string in lua defined by '[[ string ]]'.
+    """
+
+    def __init__(self, source_value: Any, object_path: str = "/") -> None:
+        super().__init__(source_value, object_path)
+
+        if "[[" in self._value or "]]" in self._value:
+            raise ValueError(
+                "multiline string contains '[[' or ']]' which is not allowed in Lua multiline literal string.",
+                object_path,
+            )
 
 
 class InterfacePort(StrBase):

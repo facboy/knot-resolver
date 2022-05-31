@@ -21,10 +21,10 @@ from knot_resolver_manager.datamodel.types import (
     IPv6Network96,
     PinSha256,
     PortNumber,
-    RawStr,
     SizeUnit,
     TimeUnit,
 )
+from knot_resolver_manager.datamodel.types.types import EscapedStr
 from knot_resolver_manager.utils.modeling import BaseSchema
 
 
@@ -121,34 +121,6 @@ def test_pin_sha256_invalid(val: str):
 @pytest.mark.parametrize(
     "val,exp",
     [
-        ("string", "string"),
-        (2000, "2000"),
-        ("\a\b\f\n\r\t\v\\", r"\a\b\f\n\r\t\v\\"),
-        ('""', r"\"\""),
-        ("''", r"\'\'"),
-        # fmt: off
-        ("''", r"\'\'"),
-        ('""', r'\"\"'),
-        ('\"\"', r"\"\""),
-        ("\'\'", r"\'\'"),
-        ('\\"\\"', r'\\\"\\\"'),
-        ("\\'\\'", r"\\\'\\\'"),
-        # fmt: on
-    ],
-)
-def test_escaped_str_valid(val: Any, exp: str):
-    assert str(EscapedStr(val)) == exp
-
-
-@pytest.mark.parametrize("val", [1.1, False])
-def test_escaped_quotes_string_invalid(val: Any):
-    with raises(ValueError):
-        EscapedStr(val)
-
-
-@pytest.mark.parametrize(
-    "val,exp",
-    [
         (2000, "2000"),
         ("string", r"string"),
         ("\t\n\x0b", r"\t\n\x0b"),
@@ -163,14 +135,14 @@ def test_escaped_quotes_string_invalid(val: Any):
         # fmt: on
     ],
 )
-def test_raw_str_valid(val: Any, exp: str):
-    assert str(RawStr(val)) == exp
+def test_escaped_str_valid(val: Any, exp: str):
+    assert str(EscapedStr(val)) == exp
 
 
 @pytest.mark.parametrize("val", [1.1, False])
-def test_raw_str_invalid(val: Any):
+def test_escaped_str_invalid(val: Any):
     with raises(ValueError):
-        RawStr(val)
+        EscapedStr(val)
 
 
 @pytest.mark.parametrize(
