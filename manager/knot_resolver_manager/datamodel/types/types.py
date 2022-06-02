@@ -140,13 +140,26 @@ class EscapedStr(StrBase):
     def __init__(self, source_value: Any, object_path: str = "/") -> None:
         super().__init__(source_value, object_path)
 
-        escape = str.maketrans(
-            {
-                "'": r"\'",
-                '"': r"\"",
-            }
-        )
-        self._value = repr(self._value)[1:-1].translate(escape)
+        escape = {
+            "'": r"\'",
+            '"': r"\"",
+            "\a": r"\a",
+            "\n": r"\n",
+            "\r": r"\r",
+            "\t": r"\t",
+            "\b": r"\b",
+            "\f": r"\f",
+            "\v": r"\v",
+            "\0": r"\0",
+        }
+
+        s = list(self._value)
+        for i, c in enumerate(self._value):
+            if c in escape:
+                s[i] = escape[c]
+            elif not c.isalnum():
+                s[i] = repr(c)[1:-1]
+        self._value = "".join(s)
 
 
 class EscapedStr32B(EscapedStr, StringLengthBase):

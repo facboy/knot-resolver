@@ -123,8 +123,8 @@ def test_pin_sha256_invalid(val: str):
     [
         (2000, "2000"),
         ("string", r"string"),
-        ("\t\n\x0b", r"\t\n\x0b"),
-        ("\a\b\f\n\r\t\v\\", r"\x07\x08\x0c\n\r\t\x0b\\"),
+        ("\t\n\v", r"\t\n\v"),
+        ("\a\b\f\n\r\t\v\\", r"\a\b\f\n\r\t\v\\"),
         # fmt: off
         ("''", r"\'\'"),
         ('""', r'\"\"'),

@@ -14,7 +14,7 @@ str_template = Template("'{{ string }}'")
     [
         ("string", "string"),
         (2000, "2000"),
-        ('"\a\b\f\n\r\t\v\\"', r"\"\x07\x08\x0c\n\r\t\x0b\\\""),
+        ('"\a\b\f\n\r\t\v\\"', r"\"\a\b\f\n\r\t\v\\\""),
         ('""', r"\"\""),
         ("''", r"\'\'"),
         # fmt: off
