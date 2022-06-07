@@ -157,15 +157,19 @@ static size_t key_common_prefix(knot_db_val_t k1, knot_db_val_t k2)
 static size_t key_common_subtree(knot_db_val_t k1, knot_db_val_t k2, size_t lf_start_i)
 {
 	ssize_t i = key_common_prefix(k1, k2);
-	// beware: '\0' at the end is excluded
-	if ((i == k1.len && i == k2.len) || i == 0)
-		return i;
-	const char *data = k1.data;
+	const char *data1 = k1.data, *data2 = k2.data;
+	// beware: '\0' at the end is excluded, so we need to handle ends separately
+	if (i == 0
+		|| (i == k1.len && i == k2.len)
+		|| (i == k1.len && data2[i] == '\0')
+		|| (i == k2.len && data1[i] == '\0')) {
+			return i;
+		}
 	do {
 		--i;
 		if (i < lf_start_i)
 			return i;
-		if (data[i] == '\0')
+		if (data2[i] == '\0')
 			return i;
 	} while (true);
 }
