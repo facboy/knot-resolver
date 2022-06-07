@@ -215,7 +215,9 @@ int kr_rule_local_data_answer(struct kr_query *qry, knot_pkt_t *pkt)
 		key.len = key_data + KEY_DNAME_END_OFFSET + 2 + sizeof(rrtype)
 			- (uint8_t *)key.data;
 		const uint16_t types[] = { rrtype, KNOT_RRTYPE_CNAME };
-		for (int i = 0; i < (2 - (rrtype == KNOT_RRTYPE_CNAME)); ++i) {
+		const bool want_CNAME = rrtype != KNOT_RRTYPE_CNAME
+					&& rrtype != KNOT_RRTYPE_DS;
+		for (int i = 0; i < 1 + want_CNAME; ++i) {
 			memcpy(key_data + KEY_DNAME_END_OFFSET + 2, &types[i], sizeof(rrtype));
 			knot_db_val_t val;
 			// LATER: use cursor to iterate over multiple rules on the same key,
@@ -232,7 +234,7 @@ int kr_rule_local_data_answer(struct kr_query *qry, knot_pkt_t *pkt)
 			return answer_exact_match(qry, pkt, types[i],
 							val.data, val.data + val.len);
 		}
-		
+
 		/* Find the closest zone-like apex that applies.
 		 * Now the key needs one byte change and a little truncation
 		 * (we may truncate repeatedly). */
@@ -245,6 +247,8 @@ int kr_rule_local_data_answer(struct kr_query *qry, knot_pkt_t *pkt)
 		kr_require(lf_start_i < KEY_MAXLEN);
 		knot_db_val_t key_leq = key;
 		knot_db_val_t val;
+		if (rrtype == KNOT_RRTYPE_DS)
+			goto shorten; // parent-side type, belongs into zone closer to root
 		// LATER: again, use cursor to iterate over multiple rules on the same key.
 		do {
 			ret = ruledb_op(read_leq, &key_leq, &val);
@@ -266,14 +270,13 @@ int kr_rule_local_data_answer(struct kr_query *qry, knot_pkt_t *pkt)
 			};
 			/* Found some good key, now check tags. */
 			if (!kr_rule_consume_tags(&val, qry->request)) {
+				kr_assert(key_leq.len >= lf_start_i);
+			shorten:
 				/* Shorten key_leq by one label and retry. */
-				if (key_leq.len <= lf_start_i) { // nowhere to shorten
-					kr_assert(key_leq.len == lf_start_i);
+				if (key_leq.len <= lf_start_i) // nowhere to shorten
 					break;
-				}
 				const char *data = key_leq.data;
-				while (key_leq.len > lf_start_i && data[key_leq.len] != '\0')
-					--key_leq.len;
+				while (key_leq.len > lf_start_i && data[--key_leq.len] != '\0') ;
 				continue;
 			}
 			/* Tags OK; execute the rule. */
