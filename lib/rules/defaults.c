@@ -33,7 +33,7 @@ int rules_defaults_insert(void)
 		"31.172.in-addr.arpa.",
 		"168.192.in-addr.arpa.",
 		"0.in-addr.arpa.",
-		// localhost_reversed handles 127.in-addr.arpa.
+		"127.in-addr.arpa.",
 		"254.169.in-addr.arpa.",
 		"2.0.192.in-addr.arpa.",
 		"100.51.198.in-addr.arpa.",
@@ -142,7 +142,7 @@ int rules_defaults_insert(void)
 		 */
 	}
 
-	{
+	{ // reverse localhost; LATER: the situation isn't ideal with NXDOMAIN + some exact matches
 		knot_dname_t name_buf[KNOT_DNAME_MAXLEN];
 		knot_rrset_t rr = {
 			.owner = knot_dname_from_str(name_buf,
@@ -157,6 +157,12 @@ int rules_defaults_insert(void)
 		int ret = knot_rrset_add_rdata(&rr, (const knot_dname_t *)"\x09localhost\0",
 						1+9+1, NULL);
 		if (!ret) ret = kr_rule_local_data_ins(&rr, NULL, KR_RULE_TAGS_ALL);
+
+		rr.owner = knot_dname_from_str(name_buf,
+				"1.0.0.127.in-addr.arpa.",
+				sizeof(name_buf));
+		if (!ret) ret = kr_rule_local_data_ins(&rr, NULL, KR_RULE_TAGS_ALL);
+
 		knot_rdataset_clear(&rr.rrs, NULL);
 		if (kr_fails_assert(!ret))
 			return kr_error(ret);

@@ -304,62 +304,6 @@ local function localhost(_, req)
 	return kres.DONE
 end
 
-local dname_rev4_localhost = todname('1.0.0.127.in-addr.arpa');
-local dname_rev4_localhost_apex = todname('127.in-addr.arpa');
-
--- Rule for reverse localhost.
--- Answer with locally served minimal 127.in-addr.arpa domain, only having
--- a PTR record in 1.0.0.127.in-addr.arpa, and with 1.0...0.ip6.arpa. zone.
--- TODO: much of this would better be left to the hints module (or coordinated).
-local function localhost_reversed(_, req)
-	local qry = req:current()
-	local answer = req:ensure_answer()
-	if answer == nil then return nil end
-
-	-- classify qry.sname:
-	local is_exact   -- exact dname for localhost
-	local is_apex    -- apex of a locally-served localhost zone
-	local is_nonterm -- empty non-terminal name
-	if ffi.C.knot_dname_in_bailiwick(qry.sname, todname('ip6.arpa.')) > 0 then
-		-- exact ::1 query (relying on the calling rule)
-		is_exact = true
-		is_apex = true
-	else
-		-- within 127.in-addr.arpa.
-		local labels = ffi.C.knot_dname_labels(qry.sname, nil)
-		if labels == 3 then
-			is_exact = false
-			is_apex = true
-		elseif labels == 4+2 and ffi.C.knot_dname_is_equal(
-					qry.sname, dname_rev4_localhost) then
-			is_exact = true
-		else
-			is_exact = false
-			is_apex = false
-			is_nonterm = ffi.C.knot_dname_in_bailiwick(dname_rev4_localhost, qry.sname) > 0
-		end
-	end
-
-	ffi.C.kr_pkt_make_auth_header(answer)
-	answer:rcode(kres.rcode.NOERROR)
-	answer:begin(kres.section.ANSWER)
-	if is_exact and qry.stype == kres.type.PTR then
-		answer:put(qry.sname, 900, answer:qclass(), kres.type.PTR, dname_localhost)
-	elseif is_apex and qry.stype == kres.type.SOA then
-		mkauth_soa(answer, dname_rev4_localhost_apex, dname_localhost)
-	elseif is_apex and qry.stype == kres.type.NS then
-		answer:put(dname_rev4_localhost_apex, 900, answer:qclass(), kres.type.NS,
-			dname_localhost)
-	else
-		if not is_nonterm then
-			answer:rcode(kres.rcode.NXDOMAIN)
-		end
-		answer:begin(kres.section.AUTHORITY)
-		mkauth_soa(answer, dname_rev4_localhost_apex, dname_localhost)
-	end
-	return kres.DONE
-end
-
 -- All requests
 function policy.all(action)
 	return function(_, _) return action end
@@ -929,13 +873,6 @@ policy.special_names = {
 	-- XXX: beware of special_names_optim() when modifying these filters
 	{
 		cb=policy.suffix(localhost, {dname_localhost}),
-		count=0
-	},
-	{
-		cb=policy.suffix_common(localhost_reversed, {
-			todname('127.in-addr.arpa.'),
-			},
-			todname('arpa.')),
 		count=0
 	},
 }
