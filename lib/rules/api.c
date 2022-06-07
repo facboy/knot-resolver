@@ -409,7 +409,7 @@ static int answer_zla_empty(struct kr_query *qry, knot_pkt_t *pkt,
 	 * as recommended except for using a fixed mname (for simplicity):
 		https://tools.ietf.org/html/rfc6303#section-3
 	 */
-	static const uint8_t soa_rdata[] = "\6nobody\7invalid\0\6nobody\7invalid\0"
+	static const uint8_t soa_rdata[] = "\x09localhost\0\6nobody\7invalid\0"
 		"\0\0\0\1\0\0\x0e\x10\0\0\4\xb0\0\x09\x3a\x80\0\0\x2a\x30";
 	const bool name_matches = knot_dname_is_equal(qry->sname, apex_name);
 	const bool want_NS = name_matches && qry->stype == KNOT_RRTYPE_NS;
