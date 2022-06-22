@@ -1,0 +1,111 @@
+###### Working notes about configuration schema
+
+
+## TODO nit: nest one level deeper inside `dnssec`, probably
+dnssec:
+  keep-removed: 0
+  refresh-time: 10s
+  hold-down-time: 30d
+
+## TODO nit: I don't like this name, at least not for the experimental thing we have there
+network:
+  tls:
+    auto_discovery: boolean
+
+#### General questions
+Plurals: do we name attributes in plural if they're a list;
+  some of them even allow a non-list if using a single element.
+
+
+#### New-policy brainstorming
+
+view:
+  - subnet: [ 10.0.0.0/8, 192.168.0.0/16 ]
+      # LATER: special addresses?
+      #   - for kresd-internal requests
+      #   - shorthands for all private IPv4 and/or IPv6;
+      #     though yaml's repeated nodes could mostly cover that
+      #     or just copy&paste from docs
+    tags: [ t1, t2, t3 ] # theoretically we could use space-separated string
+    options: # only some of the global options can be overridden in view
+      minimize: true
+      dns64: true
+      rate-limit: # future option, probably (optionally?) structured
+    # LATER: rule-sets a relatively unclear feature for now.
+    #   Their main point is to allow prioritization and avoid
+    #   intermixing rules that come from different sources.
+    ruleset: tt
+
+  - subnet: [ 10.0.10.0/24 ]
+    allow: refuse
+
+  # Or perhaps a more complex approach?  Probably not.
+  # We might have multiple conditions at once and multiple actions at once,
+  # but I don't expect these to be common, so the complication is probably not worth it.
+  # An advantage would be that the separation of the two parts would be more visible.
+  - match:
+      subnet: [ 10.0.0.0/8, 192.168.0.0/16 ]
+    do:
+      tags: [ t1, t2, t3 ]
+      options: # ...
+
+
+local-data: # TODO: name
+  ttl: 1m
+  nodata: true
+  records: |
+    example.net TXT "foo bar"
+     A 192.168.2.3
+     A 192.168.2.4
+  addresses: # automatically adds PTR records
+    foo.bar: [ 127.0.0.1, ::1 ]
+
+  subtrees:
+    - type: nxdomain
+      roots: [ sub2.example.org ] # TODO: name it the same as for forwarding
+      tags: [ t2 ]
+    - type: nxdomain
+      # Will we need to support multiple file formats in future and choose here?
+      roots-file: /path/to/file.txt
+    - type: nxdomain
+      roots-url: https://example.org/blocklist.txt
+      refresh: 1d
+      # Is it a separate rule-set?  Optionally?  Persistence?
+      # (probably the same questions for local files as well)
+
+    - type: redirect
+      roots: [ sub4.example.org ]
+      addresses: [ 127.0.0.1, ::1 ]
+
+
+forward: # TODO: "name" is from Unbound, but @vcunat would prefer "subtree" or something.
+  - name: '.'
+    servers: [2001:148f:fffe::1, 2001:148f:ffff::1, 185.43.135.1, 193.14.47.1]
+  # TLS forward, server authenticated using hostname and system-wide CA certificates
+  # https://knot-resolver.readthedocs.io/en/stable/modules-policy.html?highlight=forward#tls-examples
+  - name: '.'
+    servers:
+      - address: [ 192.0.2.1, 192.0.2.2@5353 ]
+        transport: tls
+        pin-sha256: Wg==
+      - address: 2001:DB8::d0c
+        transport: tls
+        hostname: res.example.com
+        ca-file: /etc/knot-resolver/tlsca.crt
+    options:
+      # LATER: allow a subset of options here, per sub-tree?
+      # Though that's not necessarily related to forwarding (e.g. TTL limits),
+      # especially implementation-wise it probably won't matter.
+
+
+# Too confusing approach, I suppose:
+rules:
+  example.org: &fwd_odvr
+    type: forward
+    servers: [2001:148f:fffe::1, 2001:148f:ffff::1, 185.43.135.1, 193.14.47.1]
+  sub2.example.org:
+    type: nxdomain
+  sub3.example.org:
+    type: forward-auth
+    dnssec: no
+
