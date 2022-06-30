@@ -67,11 +67,20 @@ int kr_rules_init()
 
 	struct kr_cdb_opts opts = {
 		.path = "ruledb", // under current workdir
-		.maxsize = 10 * 1024*1024,
+		// FIXME: the file will be sparse, but we still need to choose its size somehow.
+		// Later we might improve it to auto-resize in case of running out of space.
+		// Caveat: mdb_env_set_mapsize() can only be called without transactions open.
+		.maxsize = 10 * 1024*(size_t)1024,
 	};
 	int ret = the_rules->api->open(&the_rules->db, &the_rules->stats, &opts, NULL);
 	/* No persistence - we always refill from config for now.
-	 * LATER: "\0stamp" key when loading config(s). Also make it include versioning? */
+	 * LATER:
+	 *  - Make it include versioning?
+	 *  - "\0stamp" key when loading config(s)?
+	 *  - Don't clear ruleset data that doesn't come directly from config;
+	 *    and add marks for that, etc.
+	 *    (after there actually are any kinds of rules like that)
+	 */
 	if (ret == 0) ret = ruledb_op(clear);
 	if (ret != 0) goto failure;
 	kr_require(the_rules->db);
