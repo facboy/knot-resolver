@@ -57,7 +57,7 @@ static int answer_exact_match(struct kr_query *qry, knot_pkt_t *pkt, uint16_t ty
 static int answer_zla_empty(struct kr_query *qry, knot_pkt_t *pkt,
 		knot_db_val_t zla_lf, knot_db_val_t val);
 static int answer_zla_redirect(struct kr_query *qry, knot_pkt_t *pkt, const char *ruleset_name,
-				const knot_db_val_t zla_lf, const knot_db_val_t val);
+				knot_db_val_t zla_lf, knot_db_val_t val);
 
 //TODO later, maybe.  ATM it would be cumbersome to avoid void* arithmetics.
 #pragma GCC diagnostic ignored "-Wpointer-arith"

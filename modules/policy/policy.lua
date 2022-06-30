@@ -5,8 +5,6 @@ local ffi = require('ffi')
 local LOG_GRP_POLICY_TAG = ffi.string(ffi.C.kr_log_grp2name(ffi.C.LOG_GRP_POLICY))
 local LOG_GRP_REQDBG_TAG = ffi.string(ffi.C.kr_log_grp2name(ffi.C.LOG_GRP_REQDBG))
 
-local todname = kres.str2dname -- not available during module load otherwise
-
 -- Counter of unique rules
 local nextid = 0
 local function getruleid()
