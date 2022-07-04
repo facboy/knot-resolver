@@ -10,13 +10,13 @@ struct knot_pkt;
 #include <libknot/db/db.h>
 
 typedef uint64_t kr_rule_tags_t;
-#define KR_RULE_TAGS_ALL ((uint64_t)0)
+#define KR_RULE_TAGS_ALL ((kr_rule_tags_t)0)
 
 KR_EXPORT
-int kr_rules_init();
+int kr_rules_init(void);
 
 KR_EXPORT
-void kr_rules_deinit();
+void kr_rules_deinit(void);
 
 /** Try answering the query from local data.
  *

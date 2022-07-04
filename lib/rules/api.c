@@ -67,7 +67,7 @@ static int answer_zla_redirect(struct kr_query *qry, knot_pkt_t *pkt, const char
 //TODO later, maybe.  ATM it would be cumbersome to avoid void* arithmetics.
 #pragma GCC diagnostic ignored "-Wpointer-arith"
 
-int kr_rules_init()
+int kr_rules_init(void)
 {
 	kr_require(!the_rules);
 	the_rules = calloc(1, sizeof(*the_rules));
@@ -110,7 +110,7 @@ failure:
 	return ret;
 }
 
-void kr_rules_deinit()
+void kr_rules_deinit(void)
 {
 	if (!the_rules) return;
 	ruledb_op(close);
