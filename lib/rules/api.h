@@ -11,6 +11,8 @@ struct knot_pkt;
 
 typedef uint64_t kr_rule_tags_t;
 #define KR_RULE_TAGS_ALL ((kr_rule_tags_t)0)
+/// Tags "capacity", i.e. numbered from 0 to _CAP - 1.
+#define KR_RULE_TAGS_CAP (sizeof(kr_rule_tags_t) * 8)
 
 KR_EXPORT
 int kr_rules_init(void);
@@ -82,4 +84,11 @@ int kr_view_insert_action(const char *subnet, const char *action);
  */
 KR_EXPORT
 int kr_view_select_action(const struct kr_request *req, knot_db_val_t *selected);
+
+/** Add a tag by name into a tag-set variable.
+ *
+ * It also ensures allocation of tag names in the DB, etc.
+ */
+KR_EXPORT
+int kr_rule_tag_add(const char *tag, kr_rule_tags_t *tagset);
 
