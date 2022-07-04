@@ -783,12 +783,17 @@ int kr_view_select_action(const struct kr_request *req, knot_db_val_t *selected)
 				ssize_t i = key_common_prefix(key, key_leq);
 				if (i < addr_start_i) // no suitable key can exist in DB
 					break;
-				if (key_leq.len != i) {
-					if (kr_fails_assert(key.len > i && key_leq.len > i))
+				if (i != key_leq.len) {
+					if (kr_fails_assert(i < key.len && i < key_leq.len))
 						break;
 					if (!subnet_is_prefix(((uint8_t *)key_leq.data)[i],
-							      ((uint8_t *)key.data)[i]))
-						continue; // the key doesn't match
+							      ((uint8_t *)key.data)[i])) {
+						// the key doesn't match
+						// We can shorten the key to potentially
+						// speed up by skipping over whole subtrees.
+						key_leq.len = i + 1;
+						continue;
+					}
 				}
 			}
 			// We certainly have a matching key (join of various sub-cases).
