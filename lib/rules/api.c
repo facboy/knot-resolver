@@ -109,8 +109,7 @@ int kr_rule_tag_add(const char *tag, kr_rule_tags_t *tagset)
 		}
 		*tagset |= (1 << *tindex_p);
 		return kr_ok();
-	} else
-	if (ret != kr_error(ENOENT)) {
+	} else if (ret != kr_error(ENOENT)) {
 		return ret;
 	}
 
