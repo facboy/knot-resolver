@@ -123,7 +123,7 @@ Only one of these arguments can be selected during the execution of a single ``k
 
     .. code-block:: bash
 
-        $ kresctl schema ./mydir/config-schema.json
+        $ kresctl schema ./mydir/config.schema.json
 
 
 .. option:: validate
