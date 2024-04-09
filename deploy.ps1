@@ -17,7 +17,7 @@ gsudo {
 	$msys_services_local_pkgconfig = Join-Path $msys_services_local_lib -ChildPath "pkgconfig"
 	$msys_services_local_sbin = Join-Path $msys_services_local_dir -ChildPath "sbin"
 
-	robocopy "$msys_local_bin" "$msys_services_local_bin" "kdig.exe" "khost.exe" "knsec3hash.exe" "knsupdate.exe" "lmdb.dll" "lua51.dll" "msys-dnssec-*.dll" "msys-knot-*.dll" "msys-zscanner-*.dll" /w:5 /xo
+	robocopy "$msys_local_bin" "$msys_services_local_bin" "kdig.exe" "khost.exe" "knsec3hash.exe" "knsupdate.exe" "lmdb.dll" "lua51.dll" "msys-dnssec-*.dll" "msys-knot-*.dll" "msys-kres-*.dll" "msys-zscanner-*.dll" /w:5 /xo
 	robocopy "$msys_local_lib" "$msys_services_local_lib" "libdnssec.*" "libknot.*" "libkres.*" "libluajit-5.1.*" "libzscanner.*" /w:5 /xo
 	robocopy "$msys_local_knot_resolver" "$msys_services_local_knot_resolver" /w:5 /xo /s
 	robocopy "$msys_local_lua" "$msys_services_local_lua" /w:5 /xo /s
