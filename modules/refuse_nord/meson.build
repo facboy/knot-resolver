@@ -13,7 +13,7 @@ c_src_lint += refuse_nord_src
 refuse_nord_mod = shared_module(
   'refuse_nord',
   refuse_nord_src,
-  dependencies: mod_deps,
+  dependencies: mod_deps + [ libkres_dep ],
   include_directories: mod_inc_dir,
   name_prefix: '',
   install: true,

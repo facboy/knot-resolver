@@ -14,7 +14,7 @@ integr_tests += [
 stats_mod = shared_module(
   'stats',
   stats_src,
-  dependencies: mod_deps,
+  dependencies: mod_deps + [ libkres_dep ],
   include_directories: mod_inc_dir,
   name_prefix: '',
   install: true,
