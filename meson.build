@@ -239,6 +239,10 @@ foreach libname, lib: { 'libknot': libknot, 'libzscanner': libzscanner }
     p_len = run_command('sh', '-c', 'echo "' + p + '" | wc -c', check: true).stdout().to_int()
     l = ep / l.substring(p_len)
   endif
+  # bodge for cygwin, the DLLs are in `bin`, not `lib`
+  if host_machine.system() == 'cygwin'
+    l = ep / 'bin'
+  endif
   conf_data.set_quoted(libname + '_SONAME', l / lib.get_pkgconfig_variable('soname'))
 endforeach
 
