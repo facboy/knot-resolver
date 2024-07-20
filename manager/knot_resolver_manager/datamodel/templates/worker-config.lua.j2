@@ -5,7 +5,7 @@ ffi = require('ffi')
 local C = ffi.C
 
 -- Do not clear the DB with rules; we had it prepared by a different process.
-assert(C.kr_rules_init(nil, 0, false) == 0)
+assert(C.kr_rules_init(nil, 100 * 1024 * 1024, false) == 0)
 
 -- hostname
 hostname('{{ cfg.hostname }}')
@@ -33,6 +33,9 @@ nsid.name('{{ cfg.nsid }}' .. worker.id)
 
 -- DNSSEC section -----------------------------------
 {% include "dnssec.lua.j2" %}
+
+-- LOCAL-DATA section -------------------------------
+{% include "local_data.lua.j2" %}
 
 -- FORWARD section ----------------------------------
 {% include "forward.lua.j2" %}

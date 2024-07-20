@@ -1,4 +1,5 @@
 --- control socket location
+--[[
 local ffi = require('ffi')
 local id = os.getenv('SYSTEMD_INSTANCE')
 if not id then
@@ -13,6 +14,7 @@ else
 		log_warn(ffi.C.LOG_GRP_NETWORK, 'bind to '..path..' failed '..err)
 	end
 end
+]]--
 
 {% if cfg.monitoring.enabled == "always" %}
 modules.load('stats')
