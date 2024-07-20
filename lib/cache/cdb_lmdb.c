@@ -397,7 +397,23 @@ static int cdb_open_env(struct lmdb_env *env, const char *path, const size_t map
 		 * loose with the requirements as a tradeoff for speed. */
 		? MDB_WRITEMAP | MDB_NOTLS | MDB_MAPASYNC
 		: MDB_WRITEMAP | MDB_NOTLS;
+#ifdef __CYGWIN__
+	ssize_t w32_path_size = cygwin_conv_path(CCP_POSIX_TO_WIN_A, path, NULL, 0);
+	if (w32_path_size < 0) {
+		ret = errno;
+		goto error_w32;
+	}
+
+	char *w32_path = (char *) malloc (w32_path_size);
+	if (cygwin_conv_path(CCP_POSIX_TO_WIN_A, path, w32_path, w32_path_size)) {
+		ret = errno;
+		goto error_w32;
+	}
+	
+	ret = mdb_env_open(env->env, w32_path, flags, LMDB_FILE_MODE);
+#else
 	ret = mdb_env_open(env->env, path, flags, LMDB_FILE_MODE);
+#endif
 	if (ret != MDB_SUCCESS) goto error_mdb;
 #ifdef __CYGWIN__
 	mdb_filehandle_t fd;
